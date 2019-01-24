@@ -13,6 +13,8 @@ class Person {
   }
 }
 
+// Instructors will receive all of Persons props and
+// methods
 class Instructor extends Person {
   constructor(attrs) {
     super(attrs);
@@ -29,8 +31,30 @@ class Instructor extends Person {
   grade(student, subject) {
     console.log(`${student.name} receives a perfect score on ${subject}`);
   }
+
+  updateGrade(student) {
+    const grade = student.grade;
+    // Do not let grade exceed 100
+    const addAtMost = 100 - student.grade;
+    // Do not let grade fall below 0
+    const subtractAtMost = student.grade - 1;
+    const roll = Math.round(Math.random() * 10); // 0 - 10
+    // I just don't like/trust decimals in JS
+    student.grade =
+      roll >= 5
+        ? grade + changeGrade(addAtMost)
+        : grade - changeGrade(subtractAtMost);
+
+    function changeGrade(changeMax) {
+      // Something must be added/subtracted so minimum value is 1
+      // Math.random()*(max-min)+min = random num between max and min
+      return Math.round(Math.random() * (changeMax - 1) + 1);
+    }
+  }
 }
 
+// PM will receive Instructors (and thus Persons) props
+// and methods
 class ProjectManager extends Instructor {
   constructor(attrs) {
     super(attrs);
@@ -48,6 +72,7 @@ class ProjectManager extends Instructor {
   }
 }
 
+// Students will receive props and methods from Person
 class Student extends Person {
   constructor(attrs) {
     super(attrs);
@@ -55,6 +80,8 @@ class Student extends Person {
     this.previousBackground = attrs.previousBackground;
     this.className = attrs.className;
     this.favSubjects = attrs.favSubjects;
+    // Math.random()*(max-min)+min = random num between max and min
+    this.grade = Math.round(Math.random() * 99 + 1);
   }
 
   listsSubjects() {
@@ -68,7 +95,21 @@ class Student extends Person {
   sprintChallenge(subject) {
     console.log(`${this.name} has begun sprint challenge on ${subject}`);
   }
+
+  graduate(instructor) {
+    // If the student has a passing grade, the loop ends and he has graduated!
+    if (this.grade > 70) {
+      console.log(`${this.name} has graduated from Lambda School!`);
+      // Or he will fail, go into async, the instructor will update the grade
+      // and student try to gradulate again
+    } else {
+      console.log(`${this.name} has failed.  Going async!`);
+      instructor.updateGrade(this);
+      this.graduate(instructor);
+    }
+  }
 }
+
 const instructorAttrs = {
   name: "Joe Snell",
   age: 30,
@@ -111,3 +152,4 @@ stephen.speak();
 stephen.listsSubjects();
 stephen.PRAssignment("JavaScript III");
 stephen.sprintChallenge("Fundamentals of JavaScript");
+stephen.graduate(amber);
